@@ -16,6 +16,6 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {"classes": ("wide",), "fields": ("username", "password1", "password2", "birthday", "can_be_contacted", "can_data_be_shared")}),
     )
-    list_display = ("username", "birthday", "can_be_contacted", "is_staff", "is_active")
+    list_display = ("id", "username", "birthday", "can_be_contacted", "is_staff", "is_active")
     search_fields = ("username",)
     ordering = ("username",)
