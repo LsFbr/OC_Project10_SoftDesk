@@ -1,23 +1,32 @@
-"""
-URL configuration for softdesk project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from core.views import ContributorViewSet, ProjectViewSet, IssueViewSet, CommentViewSet
+from users.views import UserViewSet, RegisterView, AdminUserViewSet
+
+router = routers.SimpleRouter()
+
+router.register('projects', ProjectViewSet, basename='project')
+router.register('contributors', ContributorViewSet, basename='contributor')
+router.register('issues', IssueViewSet, basename='issue')
+router.register('comments', CommentViewSet, basename='comment')
+
+router.register('users', UserViewSet, basename='user')
+router.register('admin/users', AdminUserViewSet, basename='admin-user')
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
+    path('api-auth/', include('rest_framework.urls')),
+    path('api/auth/register/', RegisterView.as_view(), name='auth-register'),
+    path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    path('api/', include(router.urls))
 ]
+
+# Voir la librairie drf-nested-routers pour les urls imbriquées (https://github.com/alanjcastonguay/drf-nested-routers) 
+# Par exemple : api/projects/1/contributors/
+# api/projects/1/issues/
+# api/projects/1/issues/1/comments/
+# api/projects/1/issues/1/comments/1/
