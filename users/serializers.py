@@ -3,7 +3,16 @@ from rest_framework import serializers
 
 from users.models import User
 
-class UserSerializer(serializers.ModelSerializer):
+
+class UserListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "created_time"]
+        read_only_fields = ["id", "created_time"]
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
@@ -37,6 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(pwd)
         instance.save()
         return instance
+
 
 
 class RegisterSerializer(serializers.ModelSerializer):
