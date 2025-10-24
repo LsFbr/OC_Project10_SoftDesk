@@ -43,5 +43,8 @@ class User(AbstractUser):
 
     objects = UserManager()
 
+    class Meta:
+        ordering = ["-created_time"]
+
     def __str__(self):
         return self.username
