@@ -19,6 +19,9 @@ class Project(models.Model):
     author = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="authored_projects")
     created_time = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ["-created_time"]
+
     def __str__(self):
         return self.title
 
@@ -30,12 +33,15 @@ class Contributor(models.Model):
     ]
 
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="contributions")
-    project = models.ForeignKey('core.Project', on_delete=models.CASCADE, related_name="project_contributors")
+    project = models.ForeignKey('core.Project', on_delete=models.CASCADE, related_name="contributors")
     role = models.CharField(max_length=20, choices=ROLES)
     created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("user", "project")
+        constraints = [
+            models.UniqueConstraint(fields=["user", "project"], name="uniq_user_project")
+        ]
+        ordering = ["-created_time"]
 
     def __str__(self):
         return f"{self.user} → {self.project} ({self.role})"
@@ -70,6 +76,9 @@ class Issue(models.Model):
     assignee = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="assigned_issues", null=True, blank=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ["-created_time"]
+
     def __str__(self):
         return f"[{self.project}] {self.title}"
 
@@ -80,6 +89,9 @@ class Comment(models.Model):
     issue = models.ForeignKey('core.Issue', on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="authored_comments")
     created_time = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_time"]
 
     def __str__(self):
         return f"Comment {self.id} on {self.issue}"
