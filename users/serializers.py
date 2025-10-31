@@ -17,8 +17,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "password", "birthday", "can_be_contacted", "can_data_be_shared", "created_time"] # "contributions", "authored_projects", "authored_issues", "authored_comments", "assigned_issues"]
-        read_only_fields = ["id", "created_time"]
+        fields = ["id", "username", "password", "birthday", "can_be_contacted", "can_data_be_shared", "created_time", "contributions", "authored_projects", "authored_issues", "assigned_issues", "authored_comments"]
+        read_only_fields = ["id", "created_time", "contributions", "authored_projects", "authored_issues", "assigned_issues", "authored_comments"]
 
     def validate_birthday(self, value):
         if value is None:
