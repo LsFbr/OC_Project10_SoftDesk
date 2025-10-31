@@ -13,7 +13,7 @@ class AdminUserViewSet(ModelViewSet):
     detail_serializer_class = UserDetailSerializer
     queryset = User.objects.all()
 
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAdminUser]
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -24,8 +24,6 @@ class UserViewSet(ReadOnlyModelViewSet):
     serializer_class = UserListSerializer
     detail_serializer_class = UserDetailSerializer
     queryset = User.objects.all()
-
-    permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action == "list":
