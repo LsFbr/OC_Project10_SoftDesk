@@ -27,14 +27,9 @@ class Project(models.Model):
 
 
 class Contributor(models.Model):
-    ROLES = [
-        ('AUTHOR', 'Author'),
-        ('CONTRIBUTOR', 'Contributor'),
-    ]
 
     user = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="contributions")
     project = models.ForeignKey('core.Project', on_delete=models.CASCADE, related_name="contributors")
-    role = models.CharField(max_length=20, choices=ROLES)
     created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -44,7 +39,7 @@ class Contributor(models.Model):
         ordering = ["-created_time"]
 
     def __str__(self):
-        return f"{self.user} → {self.project} ({self.role})"
+        return f"{self.user} → {self.project}"
 
 
 class Issue(models.Model):
