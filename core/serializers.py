@@ -59,14 +59,28 @@ class ContributorDetailSerializer(ModelSerializer):
         return data
 
 
-class IssueSerializer(ModelSerializer):
+class IssueListSerializer(ModelSerializer):
+
+    class Meta:
+        model = Issue
+        fields = ["id", "title", "tag", "priority", "status", "author", "created_time"]
+        read_only_fields = ["id", "author", "created_time"]
+
+class IssueDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Issue
         fields = ["id", "title", "description", "tag", "priority", "status", "project", "author", "assignee", "created_time", "comments"]
         read_only_fields = ["id", "author", "created_time", "project"]
 
-class CommentSerializer(ModelSerializer):
+class CommentListSerializer(ModelSerializer):
+
+    class Meta:
+        model = Comment
+        fields = ["id", "description", "author", "created_time"]
+        read_only_fields = ["id", "author", "created_time", "issue"]
+
+class CommentDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Comment
