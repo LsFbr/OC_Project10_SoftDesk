@@ -5,6 +5,8 @@ from .models import User
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
+    list_display = ("id", "username", "birthday", "can_be_contacted", "is_staff", "is_active", "created_time")
+
     readonly_fields = ("created_time", "last_login", "date_joined")
     
     fieldsets = (
@@ -16,6 +18,5 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {"classes": ("wide",), "fields": ("username", "password1", "password2", "birthday", "can_be_contacted", "can_data_be_shared")}),
     )
-    list_display = ("id", "username", "birthday", "can_be_contacted", "is_staff", "is_active")
     search_fields = ("username",)
     ordering = ("username",)
