@@ -29,12 +29,21 @@ class ProjectDetailSerializer(ModelSerializer):
         queryset = instance.issues.all()
         return [{"id": issue.id, "title": issue.title} for issue in queryset]
 
-class ContributorSerializer(ModelSerializer):
+
+class ContributorListSerializer(ModelSerializer):
 
     class Meta:
         model = Contributor
-        fields = ["id", "user", "project", "role", "created_time"]
-        read_only_fields = ["id", "created_time"]
+        fields = ["id", "user", "created_time"]
+        read_only_fields = ["id", "user", "created_time"]
+
+
+class ContributorDetailSerializer(ModelSerializer):
+
+    class Meta:
+        model = Contributor
+        fields = ["id", "user", "project", "created_time"]
+        read_only_fields = ["id", "user", "created_time", "project"]
 
 
 class IssueSerializer(ModelSerializer):
@@ -42,12 +51,12 @@ class IssueSerializer(ModelSerializer):
     class Meta:
         model = Issue
         fields = ["id", "title", "description", "tag", "priority", "status", "project", "author", "assignee", "created_time", "comments"]
-        read_only_fields = ["id", "author", "created_time"]
+        read_only_fields = ["id", "author", "created_time", "project"]
 
 class CommentSerializer(ModelSerializer):
 
     class Meta:
         model = Comment
         fields = ["id", "description", "issue", "author", "created_time"]
-        read_only_fields = ["id", "author", "created_time"]
+        read_only_fields = ["id", "author", "created_time", "issue"]
 
