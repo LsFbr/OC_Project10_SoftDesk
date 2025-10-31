@@ -1,9 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied, MethodNotAllowed
 from rest_framework.response import Response
 from rest_framework import status
 from core.models import Contributor, Project, Issue, Comment
-from core.serializers import ProjectListSerializer, ProjectDetailSerializer, ContributorListSerializer, ContributorDetailSerializer, IssueSerializer, CommentSerializer
+from core.serializers import ProjectListSerializer, ProjectDetailSerializer, ContributorListSerializer, ContributorDetailSerializer, IssueListSerializer, IssueDetailSerializer, CommentListSerializer, CommentDetailSerializer
 
 class MultipleSerializerMixin:
 
@@ -57,8 +57,18 @@ class ContributorViewSet(MultipleSerializerMixin, ModelViewSet):
             raise ValidationError("This user is already a contributor of the project.")
         serializer.save(project_id=project_id) 
 
+    def update(self, request, *args, **kwargs):
+        raise MethodNotAllowed("PUT")
+
+    def partial_update(self, request, *args, **kwargs):
+        raise MethodNotAllowed("PATCH")
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+
+        if instance.user_id == instance.project.author_id:
+            raise PermissionDenied("You cannot remove the project's author from contributors.")
+
         contributor_id = instance.id
         username = instance.user.username
         project_id = instance.project_id
@@ -74,10 +84,12 @@ class ContributorViewSet(MultipleSerializerMixin, ModelViewSet):
         )
 
 
-class IssueViewSet(ModelViewSet):
-    serializer_class = IssueSerializer
+class IssueViewSet(MultipleSerializerMixin, ModelViewSet):
+    serializer_class = IssueListSerializer
+    detail_serializer_class = IssueDetailSerializer
     queryset = Issue.objects.all()
 
-class CommentViewSet(ModelViewSet):
-    serializer_class = CommentSerializer
+class CommentViewSet(MultipleSerializerMixin, ModelViewSet):
+    serializer_class = CommentListSerializer
+    detail_serializer_class = CommentDetailSerializer
     queryset = Comment.objects.all()
