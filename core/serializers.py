@@ -61,10 +61,18 @@ class ContributorDetailSerializer(ModelSerializer):
 
 class IssueListSerializer(ModelSerializer):
 
+    description = serializers.CharField(write_only=True, required=False)
+    assignee = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True, allow_null=True)
+
     class Meta:
         model = Issue
-        fields = ["id", "title", "tag", "priority", "status", "author", "created_time"]
+        fields = ["id", "title", "tag", "priority", "status", "author", "created_time", "description", "assignee"]
         read_only_fields = ["id", "author", "created_time"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["author"] = {"id": instance.author_id, "username": instance.author.username}
+        return data
 
 class IssueDetailSerializer(ModelSerializer):
 
@@ -72,6 +80,16 @@ class IssueDetailSerializer(ModelSerializer):
         model = Issue
         fields = ["id", "title", "description", "tag", "priority", "status", "project", "author", "assignee", "created_time", "comments"]
         read_only_fields = ["id", "author", "created_time", "project"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["author"] = {"id": instance.author_id, "username": instance.author.username}
+        data["project"] = {"id": instance.project_id, "title": instance.project.title}
+        if instance.assignee:
+            data["assignee"] = {"id": instance.assignee_id, "username": instance.assignee.username}
+        else:
+            data["assignee"] = None
+        return data
 
 class CommentListSerializer(ModelSerializer):
 
