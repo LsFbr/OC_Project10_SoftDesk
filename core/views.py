@@ -87,7 +87,34 @@ class ContributorViewSet(MultipleSerializerMixin, ModelViewSet):
 class IssueViewSet(MultipleSerializerMixin, ModelViewSet):
     serializer_class = IssueListSerializer
     detail_serializer_class = IssueDetailSerializer
-    queryset = Issue.objects.all()
+
+    def get_queryset(self):
+        # /projects/{project_pk}/issues/
+        project_id = self.kwargs.get('project_pk')
+        queryset = Issue.objects.select_related("author", "assignee", "project")
+        return queryset.filter(project_id=project_id) if project_id else queryset
+
+    def perform_create(self, serializer):
+        project_id = self.kwargs.get('project_pk')
+        if not project_id:
+            raise ValidationError("Project context is required.")
+        serializer.save(project_id=project_id, author=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        issue_id = instance.id
+        title = instance.title
+        project_id = instance.project_id
+        project_title = instance.project.title
+        
+        self.perform_destroy(instance)
+
+        return Response(
+            {
+                "detail": f"Issue '{title}' (id={issue_id}) deleted from project '{project_title}' (id={project_id}).",
+            },
+            status=status.HTTP_200_OK
+        )
 
 class CommentViewSet(MultipleSerializerMixin, ModelViewSet):
     serializer_class = CommentListSerializer
