@@ -1,4 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework import status
 from core.models import Contributor, Project, Issue, Comment
 from core.serializers import ProjectListSerializer, ProjectDetailSerializer, ContributorListSerializer, ContributorDetailSerializer, IssueSerializer, CommentSerializer
 
@@ -14,12 +17,26 @@ class MultipleSerializerMixin:
 class ProjectViewSet(MultipleSerializerMixin, ModelViewSet):
     serializer_class = ProjectListSerializer
     detail_serializer_class = ProjectDetailSerializer
-    #queryset = Project.objects.select_related("author").prefetch_related("contributors__user", "issues")
     queryset = Project.objects.all()
 
     def perform_create(self, serializer):
         project = serializer.save(author=self.request.user)
         Contributor.objects.get_or_create(user=self.request.user, project=project)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        project_id = instance.id
+        title = instance.title
+
+        self.perform_destroy(instance)
+
+        return Response(
+            {
+                "detail": f"Project '{title}' (id={project_id}) deleted.",
+            },
+            status=status.HTTP_200_OK
+        )
+
 
 class ContributorViewSet(MultipleSerializerMixin, ModelViewSet):
     serializer_class = ContributorListSerializer
@@ -35,7 +52,26 @@ class ContributorViewSet(MultipleSerializerMixin, ModelViewSet):
         project_id = self.kwargs.get('project_pk')
         if not project_id:
             raise ValidationError("Project context is required.")
+        user = serializer.validated_data.get("user")
+        if Contributor.objects.filter(project_id=project_id, user=user).exists():
+            raise ValidationError("This user is already a contributor of the project.")
         serializer.save(project_id=project_id) 
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        contributor_id = instance.id
+        username = instance.user.username
+        project_id = instance.project_id
+        project_title = instance.project.title
+
+        self.perform_destroy(instance)
+
+        return Response(
+            {
+                "detail": f"Contributor '{username}'(id={contributor_id}) removed from project '{project_title}' (id={project_id}).",
+            },
+            status=status.HTTP_200_OK
+        )
 
 
 class IssueViewSet(ModelViewSet):
