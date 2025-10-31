@@ -1,7 +1,9 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
-
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
 from core.models import Contributor, Project, Issue, Comment
 
+User = get_user_model()
 
 class ProjectListSerializer(ModelSerializer):
 
@@ -13,37 +15,48 @@ class ProjectListSerializer(ModelSerializer):
 
 class ProjectDetailSerializer(ModelSerializer):
 
-    contributors = SerializerMethodField()
-    issues = SerializerMethodField()
-
     class Meta:
         model = Project
         fields = ["id", "title", "description", "type", "author", "created_time", "issues", "contributors"]
         read_only_fields = ["id", "author", "created_time"]
 
-    def get_contributors(self, instance):
-        queryset = instance.contributors.all()
-        return [{"id": contributor.id, "user": contributor.user.username} for contributor in queryset]
-
-    def get_issues(self, instance):
-        queryset = instance.issues.all()
-        return [{"id": issue.id, "title": issue.title} for issue in queryset]
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["author"] = {"id": instance.author_id, "username": instance.author.username}
+        data["contributors"] = [{"id": contributor.id, "user": contributor.user.username} for contributor in instance.contributors.all()]
+        data["issues"] = [{"id": issue.id, "title": issue.title} for issue in instance.issues.all()]
+        return data
 
 
 class ContributorListSerializer(ModelSerializer):
 
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
     class Meta:
         model = Contributor
         fields = ["id", "user", "created_time"]
-        read_only_fields = ["id", "user", "created_time"]
+        read_only_fields = ["id", "created_time"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["user"] = {"id": instance.user_id, "username": instance.user.username}
+        return data
 
 
 class ContributorDetailSerializer(ModelSerializer):
 
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
     class Meta:
         model = Contributor
         fields = ["id", "user", "project", "created_time"]
-        read_only_fields = ["id", "user", "created_time", "project"]
+        read_only_fields = ["id", "created_time", "project"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["user"] = {"id": instance.user_id, "username": instance.user.username}
+        data["project"] = {"id": instance.project_id, "title": instance.project.title}
+        return data
 
 
 class IssueSerializer(ModelSerializer):
