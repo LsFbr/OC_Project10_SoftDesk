@@ -74,6 +74,19 @@ class IssueListSerializer(ModelSerializer):
         data["author"] = {"id": instance.author_id, "username": instance.author.username}
         return data
 
+    def validate_assignee(self, value):
+        if value is None:
+            return value
+        view = self.context.get("view")
+        project_id = None
+        if view:
+            project_id = view.kwargs.get("project_pk")
+        if project_id is None and self.instance is not None:
+            project_id = self.instance.project_id
+        if project_id and not Contributor.objects.filter(project_id=project_id, user=value).exists():
+            raise serializers.ValidationError("L'utilisateur doit être contributor du projet.")
+        return value
+
 class IssueDetailSerializer(ModelSerializer):
 
     class Meta:
