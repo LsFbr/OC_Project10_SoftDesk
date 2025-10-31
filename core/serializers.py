@@ -17,7 +17,7 @@ class ProjectDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ["id", "title", "description", "type", "author", "created_time", "issues", "contributors"]
+        fields = ["id", "title", "description", "type", "author", "created_time", "issues", "contributors", "issues"]
         read_only_fields = ["id", "author", "created_time"]
 
     def to_representation(self, instance):
@@ -102,6 +102,7 @@ class IssueDetailSerializer(ModelSerializer):
             data["assignee"] = {"id": instance.assignee_id, "username": instance.assignee.username}
         else:
             data["assignee"] = None
+        data["comments"] = [{"id": comment.id, "description": comment.description} for comment in instance.comments.all()]
         return data
 
 class CommentListSerializer(ModelSerializer):
