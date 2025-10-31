@@ -46,6 +46,15 @@ class UserDetailSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["contributions"] = [{"id": contribution.id, "project": contribution.project.title} for contribution in instance.contributions.all()]
+        data["authored_projects"] = [{"id": project.id, "title": project.title} for project in instance.authored_projects.all()]
+        data["authored_issues"] = [{"id": issue.id, "title": issue.title} for issue in instance.authored_issues.all()]
+        data["assigned_issues"] = [{"id": issue.id, "title": issue.title} for issue in instance.assigned_issues.all()]
+        data["authored_comments"] = [{"id": comment.id, "description": comment.description} for comment in instance.authored_comments.all()]
+        return data
+
 
 
 class RegisterSerializer(serializers.ModelSerializer):
