@@ -9,3 +9,11 @@ class ProjectAdmin(admin.ModelAdmin):
 class ContributorAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "project", "created_time")
 
+@admin.register(Issue)
+class IssueAdmin(admin.ModelAdmin):
+    list_display = ("id", "title", "description", "tag", "priority", "status", "project", "author", "assignee", "created_time")
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ("id", "description", "issue", "author", "created_time")
+
