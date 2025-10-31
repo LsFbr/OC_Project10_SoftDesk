@@ -65,7 +65,7 @@ class Issue(models.Model):
     description = models.TextField(max_length=2048, blank=True)
     tag = models.CharField(max_length=20, choices=TAGS)
     priority = models.CharField(max_length=20, choices=PRIORITIES)
-    status = models.CharField(max_length=20, choices=STATUSES)
+    status = models.CharField(max_length=20, choices=STATUSES, default="TODO")
     project = models.ForeignKey('core.Project', on_delete=models.CASCADE, related_name="issues")
     author = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="authored_issues")
     assignee = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="assigned_issues", null=True, blank=True)
