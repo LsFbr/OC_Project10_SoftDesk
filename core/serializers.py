@@ -63,7 +63,7 @@ class ContributorDetailSerializer(ModelSerializer):
 class IssueListSerializer(ModelSerializer):
 
     description = serializers.CharField(write_only=True, required=False)
-    assignee = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True, allow_null=True)
+    assignee = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True, allow_null=True, required=False)
 
     class Meta:
         model = Issue
@@ -122,8 +122,6 @@ class CommentListSerializer(ModelSerializer):
 
 class CommentDetailSerializer(ModelSerializer):
 
-
-
     class Meta:
         model = Comment
         fields = ["id", "description", "issue", "author", "created_time"]
@@ -136,7 +134,7 @@ class CommentDetailSerializer(ModelSerializer):
         data["issue"] = {
             "id": instance.issue_id, 
             "title": instance.issue.title,
-            "detail_url": request.build_absolute_uri(
+            "url": request.build_absolute_uri(
                 reverse(
                     "project-issues-detail",
                     kwargs={"project_pk": instance.issue.project_id, "pk": instance.issue_id},
