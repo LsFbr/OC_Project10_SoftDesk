@@ -11,6 +11,9 @@ class IsProjectContributor(BasePermission):
     Laisse la création de projet ouverte aux utilisateurs authentifiés.
     """
     def has_permission(self, request, view):
+        if request.user and request.user.is_superuser: # si l'utilisateur est un superutilisateur, on lui donne accès à tout
+            return True
+
         # Laisser passer la création de projet
         if getattr(view, "basename", None) == "project" and request.method == "POST":
             return True
@@ -22,6 +25,9 @@ class IsProjectContributor(BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
+        if request.user and request.user.is_superuser:
+            return True
+
         if isinstance(obj, Project):
             project_id = obj.id
         elif isinstance(obj, Issue):
@@ -35,9 +41,11 @@ class IsProjectContributor(BasePermission):
 class IsAuthorOrReadOnly(BasePermission):
     """Écriture réservée à l’auteur, lecture pour tous les contributeurs."""
     def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
+        if request.user and request.user.is_superuser:
             return True
-        return getattr(obj, "author", None) == request.user
+        if request.method in SAFE_METHODS: # si la méthode est safe (GET, OPTIONS, HEAD), on lui donne accès
+            return True
+        return getattr(obj, "author", None) == request.user # si l'objet a un auteur et que c'est l'utilisateur, on lui donne accès
 
 
 class IsProjectAuthorForContributors(BasePermission):
@@ -46,6 +54,9 @@ class IsProjectAuthorForContributors(BasePermission):
     Lecture autorisée aux contributeurs (gérée par IsProjectContributor).
     """
     def has_permission(self, request, view):
+        if request.user and request.user.is_superuser:
+            return True
+
         # On ne restreint que les méthodes d'écriture
         if request.method in ("POST", "PUT", "PATCH", "DELETE"):
             project_id = view.kwargs.get("project_pk")
