@@ -63,11 +63,11 @@ class ContributorDetailSerializer(ModelSerializer):
 class IssueListSerializer(ModelSerializer):
 
     description = serializers.CharField(write_only=True, required=False)
-    assignee = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True, allow_null=True, required=False)
+    assignee = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), allow_null=True, required=False)
 
     class Meta:
         model = Issue
-        fields = ["id", "title", "tag", "priority", "status", "author", "created_time", "description", "assignee"]
+        fields = ["id", "title", "tag", "priority", "status", "author", "assignee", "created_time", "description"]
         read_only_fields = ["id", "author", "created_time"]
 
     def to_representation(self, instance):
