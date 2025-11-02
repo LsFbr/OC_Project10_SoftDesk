@@ -31,6 +31,8 @@ class ProjectViewSet(MultipleSerializerMixin, ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        if user.is_superuser:
+            return Project.objects.all() # si l'utilisateur est un superutilisateur, on lui donne accès à tous les projets
         return Project.objects.filter(contributors__user=user) # filtre les projets dont l'utilisateur est contributeur
 
     def perform_create(self, serializer):
