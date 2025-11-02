@@ -58,7 +58,6 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    # utilisé UNIQUEMENT pour la route d’inscription
     password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
