@@ -1,5 +1,6 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 from django.contrib.auth import get_user_model
 from core.models import Contributor, Project, Issue, Comment
 
@@ -17,7 +18,7 @@ class ProjectDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ["id", "title", "description", "type", "author", "created_time", "issues", "contributors", "issues"]
+        fields = ["id", "title", "description", "type", "author", "created_time", "issues", "contributors"]
         read_only_fields = ["id", "author", "created_time"]
 
     def to_representation(self, instance):
@@ -105,17 +106,43 @@ class IssueDetailSerializer(ModelSerializer):
         data["comments"] = [{"id": comment.id, "description": comment.description} for comment in instance.comments.all()]
         return data
 
+
 class CommentListSerializer(ModelSerializer):
 
     class Meta:
         model = Comment
         fields = ["id", "description", "author", "created_time"]
-        read_only_fields = ["id", "author", "created_time", "issue"]
+        read_only_fields = ["id", "author", "created_time"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["author"] = {"id": instance.author_id, "username": instance.author.username}
+        return data
+
 
 class CommentDetailSerializer(ModelSerializer):
+
+
 
     class Meta:
         model = Comment
         fields = ["id", "description", "issue", "author", "created_time"]
         read_only_fields = ["id", "author", "created_time", "issue"]
+
+    def to_representation(self, instance):
+        request = self.context.get("request")
+        data = super().to_representation(instance)
+        data["author"] = {"id": instance.author_id, "username": instance.author.username}
+        data["issue"] = {
+            "id": instance.issue_id, 
+            "title": instance.issue.title,
+            "detail_url": request.build_absolute_uri(
+                reverse(
+                    "project-issues-detail",
+                    kwargs={"project_pk": instance.issue.project_id, "pk": instance.issue_id},
+                    request=request,
+                )
+            )
+        }
+        return data
 
