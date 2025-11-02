@@ -119,4 +119,41 @@ class IssueViewSet(MultipleSerializerMixin, ModelViewSet):
 class CommentViewSet(MultipleSerializerMixin, ModelViewSet):
     serializer_class = CommentListSerializer
     detail_serializer_class = CommentDetailSerializer
-    queryset = Comment.objects.all()
+    
+    def get_queryset(self):
+        # /projects/{project_pk}/issues/{issue_pk}/comments/
+        project_id = self.kwargs.get('project_pk')
+        issue_id = self.kwargs.get('issue_pk')
+        queryset = Comment.objects.select_related("author", "issue", "issue__project")
+        if issue_id:
+            queryset = queryset.filter(issue_id=issue_id)
+        if project_id:
+            queryset = queryset.filter(issue__project_id=project_id)
+        return queryset
+
+    def perform_create(self, serializer):
+        project_id = self.kwargs.get('project_pk')
+        issue_id = self.kwargs.get('issue_pk')
+        if not issue_id:
+            raise ValidationError("Issue context is required.")
+        try:
+            issue = Issue.objects.get(id=issue_id, project_id=project_id)
+        except Issue.DoesNotExist:
+            raise ValidationError("Issue not found for this project.")
+        serializer.save(issue=issue, author=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        comment_id = instance.id
+        description = instance.description
+        issue_id = instance.issue_id
+        issue_title = instance.issue.title
+        
+        self.perform_destroy(instance)
+        
+        return Response(
+            {
+                "detail": f"Comment '{description}' (id={comment_id}) deleted from issue '{issue_title}' (id={issue_id}).",
+            },
+            status=status.HTTP_200_OK
+        )
