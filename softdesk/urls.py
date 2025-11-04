@@ -3,12 +3,11 @@ from django.urls import path, include
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from core.views import ContributorViewSet, ProjectViewSet, IssueViewSet, CommentViewSet
-from users.views import UserViewSet, RegisterView, AdminUserViewSet
+from users.views import UserViewSet, RegisterView
 
 router = routers.SimpleRouter()
 router.register('projects', ProjectViewSet, basename='project')
 router.register('users', UserViewSet, basename='user')
-router.register('admin/users', AdminUserViewSet, basename='admin-user')
 
 projects_router = routers.NestedSimpleRouter(router, r'projects', lookup='project')
 projects_router.register(r'contributors', ContributorViewSet, basename='project-contributors')
