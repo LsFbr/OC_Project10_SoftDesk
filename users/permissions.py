@@ -1,16 +1,24 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
-class IsSuperuserOrReadOnly(BasePermission):
+class IsSelfOrSuperuserOrReadOnly(BasePermission):
     """
-    Lecture pour tout utilisateur authentifié (géré par IsAuthenticated au niveau de la vue).
-    Écriture (POST, PUT, PATCH, DELETE) réservée aux superusers.
+    Lecture: autorisée aux utilisateurs authentifiés (gérée par IsAuthenticated).
+    Écriture:
+      - superuser: autorisée sur tout le monde
+      - utilisateur standard: autorisée uniquement sur son propre objet User
     """
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        return bool(request.user and request.user.is_superuser)
+        if getattr(view, "action", None) == "create":
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
-            return True
-        return bool(request.user and request.user.is_superuser)
+            return bool(request.user and (request.user.is_superuser or obj.id == request.user.id))
+
+        if request.method == "DELETE":
+            return bool(request.user and request.user.is_superuser)
+
+        return bool(request.user and (request.user.is_superuser or obj.id == request.user.id))
