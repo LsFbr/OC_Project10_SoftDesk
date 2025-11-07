@@ -13,6 +13,11 @@ class ProjectListSerializer(ModelSerializer):
         fields = ["id", "title", "description", "type", "author", "created_time"]
         read_only_fields = ["id", "author", "created_time"]
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["author"] = {"id": instance.author_id, "username": instance.author.username}
+        return data
+
 
 class ProjectDetailSerializer(ModelSerializer):
 
@@ -24,7 +29,7 @@ class ProjectDetailSerializer(ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["author"] = {"id": instance.author_id, "username": instance.author.username}
-        data["contributors"] = [{"id": contributor.id, "user": contributor.user.username} for contributor in instance.contributors.all()]
+        data["contributors"] = [{"id": contributor.id, "user_id": contributor.user_id, "username": contributor.user.username} for contributor in instance.contributors.all()]
         data["issues"] = [{"id": issue.id, "title": issue.title} for issue in instance.issues.all()]
         return data
 
@@ -73,6 +78,10 @@ class IssueListSerializer(ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["author"] = {"id": instance.author_id, "username": instance.author.username}
+        if instance.assignee:
+            data["assignee"] = {"id": instance.assignee_id, "username": instance.assignee.username}
+        else:
+            data["assignee"] = None
         return data
 
     def validate_assignee(self, value):
