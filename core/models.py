@@ -68,7 +68,7 @@ class Issue(models.Model):
     status = models.CharField(max_length=20, choices=STATUSES, default="TODO")
     project = models.ForeignKey('core.Project', on_delete=models.CASCADE, related_name="issues")
     author = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="authored_issues")
-    assignee = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name="assigned_issues", null=True, blank=True)
+    assignee = models.ForeignKey('users.User', on_delete=models.SET_NULL, related_name="assigned_issues", null=True, blank=True)
     created_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
