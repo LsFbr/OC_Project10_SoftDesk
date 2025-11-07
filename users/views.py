@@ -7,13 +7,13 @@ from rest_framework import status
 
 from users.serializers import UserDetailSerializer, UserListSerializer, RegisterSerializer
 from users.models import User
-from users.permissions import IsSuperuserOrReadOnly
+from users.permissions import IsSelfOrSuperuserOrReadOnly
 
 class UserViewSet(ModelViewSet):
     serializer_class = UserListSerializer
     detail_serializer_class = UserDetailSerializer
     queryset = User.objects.all()
-    permission_classes = [IsAuthenticated, IsSuperuserOrReadOnly]
+    permission_classes = [IsAuthenticated, IsSelfOrSuperuserOrReadOnly]
 
     def get_serializer_class(self):
         if self.action == "list":
