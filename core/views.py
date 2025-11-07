@@ -15,11 +15,12 @@ from core.permissions import IsProjectContributor, IsAuthorOrReadOnly, IsProject
 
 
 class MultipleSerializerMixin:
-
     detail_serializer_class = None
 
     def get_serializer_class(self):
-        if self.action == 'retrieve' and self.detail_serializer_class is not None:
+        if self.detail_serializer_class and getattr(self, "action", None) in (
+            "retrieve", "create", "update", "partial_update"
+        ):
             return self.detail_serializer_class
         return super().get_serializer_class()
 
@@ -108,7 +109,12 @@ class IssueViewSet(MultipleSerializerMixin, ModelViewSet):
         project_id = self.kwargs.get('project_pk')
         if not project_id:
             raise ValidationError("Project context is required.")
-        serializer.save(project_id=project_id, author=self.request.user)
+
+        assignee = serializer.validated_data.get("assignee")
+        if assignee is None:
+            assignee = self.request.user
+
+        serializer.save(project_id=project_id, author=self.request.user, assignee=assignee)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
