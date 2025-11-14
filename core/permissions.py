@@ -34,6 +34,8 @@ class IsProjectContributor(BasePermission):
             project_id = obj.project_id
         elif isinstance(obj, Comment):
             project_id = obj.issue.project_id
+        elif isinstance(obj, Contributor):
+            project_id = obj.project_id
         else:
             return False
         return _user_is_contributor(request.user, project_id)
