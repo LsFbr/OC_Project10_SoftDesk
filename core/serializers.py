@@ -89,6 +89,17 @@ class IssueListSerializer(ModelSerializer):
             data["assignee"] = None
         return data
 
+
+class IssueDetailSerializer(ModelSerializer):
+
+    class Meta:
+        model = Issue
+        fields = [
+            "id", "title", "description", "tag", "priority", "status",
+            "project", "author", "assignee", "created_time", "comments"
+        ]
+        read_only_fields = ["id", "author", "created_time", "project"]
+
     def validate_assignee(self, value):
         if value is None:
             return value
@@ -101,17 +112,6 @@ class IssueListSerializer(ModelSerializer):
         if project_id and not Contributor.objects.filter(project_id=project_id, user=value).exists():
             raise serializers.ValidationError("L'utilisateur doit être contributor du projet.")
         return value
-
-
-class IssueDetailSerializer(ModelSerializer):
-
-    class Meta:
-        model = Issue
-        fields = [
-            "id", "title", "description", "tag", "priority", "status",
-            "project", "author", "assignee", "created_time", "comments"
-        ]
-        read_only_fields = ["id", "author", "created_time", "project"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
