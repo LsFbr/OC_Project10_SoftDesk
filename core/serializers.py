@@ -1,10 +1,11 @@
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 from django.contrib.auth import get_user_model
 from core.models import Contributor, Project, Issue, Comment
 
 User = get_user_model()
+
 
 class ProjectListSerializer(ModelSerializer):
 
@@ -29,7 +30,11 @@ class ProjectDetailSerializer(ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["author"] = {"id": instance.author_id, "username": instance.author.username}
-        data["contributors"] = [{"id": contributor.id, "user_id": contributor.user_id, "username": contributor.user.username} for contributor in instance.contributors.all()]
+        data["contributors"] = [
+            {"id": contributor.id, "user_id": contributor.user_id,
+             "username": contributor.user.username}
+            for contributor in instance.contributors.all()
+        ]
         data["issues"] = [{"id": issue.id, "title": issue.title} for issue in instance.issues.all()]
         return data
 
@@ -97,11 +102,15 @@ class IssueListSerializer(ModelSerializer):
             raise serializers.ValidationError("L'utilisateur doit être contributor du projet.")
         return value
 
+
 class IssueDetailSerializer(ModelSerializer):
 
     class Meta:
         model = Issue
-        fields = ["id", "title", "description", "tag", "priority", "status", "project", "author", "assignee", "created_time", "comments"]
+        fields = [
+            "id", "title", "description", "tag", "priority", "status",
+            "project", "author", "assignee", "created_time", "comments"
+        ]
         read_only_fields = ["id", "author", "created_time", "project"]
 
     def to_representation(self, instance):
@@ -112,7 +121,10 @@ class IssueDetailSerializer(ModelSerializer):
             data["assignee"] = {"id": instance.assignee_id, "username": instance.assignee.username}
         else:
             data["assignee"] = None
-        data["comments"] = [{"id": comment.id, "description": comment.description} for comment in instance.comments.all()]
+        data["comments"] = [
+            {"id": comment.id, "description": comment.description}
+            for comment in instance.comments.all()
+        ]
         return data
 
 
@@ -141,7 +153,7 @@ class CommentDetailSerializer(ModelSerializer):
         data = super().to_representation(instance)
         data["author"] = {"id": instance.author_id, "username": instance.author.username}
         data["issue"] = {
-            "id": instance.issue_id, 
+            "id": instance.issue_id,
             "title": instance.issue.title,
             "url": request.build_absolute_uri(
                 reverse(
@@ -152,4 +164,3 @@ class CommentDetailSerializer(ModelSerializer):
             )
         }
         return data
-

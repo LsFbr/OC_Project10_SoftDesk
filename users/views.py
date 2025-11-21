@@ -1,5 +1,5 @@
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import CreateAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
@@ -8,6 +8,7 @@ from rest_framework import status
 from users.serializers import UserDetailSerializer, UserListSerializer, RegisterSerializer
 from users.models import User
 from users.permissions import IsSelfOrSuperuserOrReadOnly
+
 
 class UserViewSet(ModelViewSet):
     serializer_class = UserListSerializer
@@ -31,7 +32,7 @@ class UserViewSet(ModelViewSet):
             {"detail": f"User '{username}'(id={user_id}) deleted."},
             status=status.HTTP_200_OK
         )
-    
+
 
 class RegisterView(CreateAPIView):
 

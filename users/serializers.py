@@ -17,8 +17,15 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "password", "birthday", "can_be_contacted", "can_data_be_shared", "created_time", "contributions", "authored_projects", "authored_issues", "assigned_issues", "authored_comments"]
-        read_only_fields = ["id", "created_time", "contributions", "authored_projects", "authored_issues", "assigned_issues", "authored_comments"]
+        fields = [
+            "id", "username", "password", "birthday", "can_be_contacted",
+            "can_data_be_shared", "created_time", "contributions",
+            "authored_projects", "authored_issues", "assigned_issues", "authored_comments"
+        ]
+        read_only_fields = [
+            "id", "created_time", "contributions", "authored_projects",
+            "authored_issues", "assigned_issues", "authored_comments"
+        ]
 
     def validate_birthday(self, value):
         if value is None:
@@ -27,7 +34,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         years = today.year - value.year - ((today.month, today.day) < (value.month, value.day))
         if years < 15:
             raise serializers.ValidationError("L'utilisateur doit avoir au moins 15 ans pour s'inscrire (RGPD).")
-        
+
         return value
 
     def create(self, validated_data):
@@ -48,13 +55,30 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data["contributions"] = [{"id": contribution.id, "project_id": contribution.project.id, "project_title": contribution.project.title} for contribution in instance.contributions.all()]
-        data["authored_projects"] = [{"id": project.id, "title": project.title} for project in instance.authored_projects.all()]
-        data["authored_issues"] = [{"id": issue.id, "title": issue.title} for issue in instance.authored_issues.all()]
-        data["assigned_issues"] = [{"id": issue.id, "title": issue.title} for issue in instance.assigned_issues.all()]
-        data["authored_comments"] = [{"id": comment.id, "description": comment.description} for comment in instance.authored_comments.all()]
+        data["contributions"] = [
+            {
+                "id": contribution.id, "project_id": contribution.project.id,
+                "project_title": contribution.project.title
+            }
+            for contribution in instance.contributions.all()
+        ]
+        data["authored_projects"] = [
+            {"id": project.id, "title": project.title}
+            for project in instance.authored_projects.all()
+        ]
+        data["authored_issues"] = [
+            {"id": issue.id, "title": issue.title}
+            for issue in instance.authored_issues.all()
+        ]
+        data["assigned_issues"] = [
+            {"id": issue.id, "title": issue.title}
+            for issue in instance.assigned_issues.all()
+        ]
+        data["authored_comments"] = [
+            {"id": comment.id, "description": comment.description}
+            for comment in instance.authored_comments.all()
+        ]
         return data
-
 
 
 class RegisterSerializer(serializers.ModelSerializer):

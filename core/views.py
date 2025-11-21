@@ -34,22 +34,34 @@ class ProjectViewSet(MultipleSerializerMixin, ModelViewSet):
         user = self.request.user
 
         queryset = Project.objects.select_related("author").prefetch_related("contributors", "issues")
+        # si l'utilisateur est un superutilisateur, on lui donne accès à tous les projets
         if user.is_superuser:
-            return queryset # si l'utilisateur est un superutilisateur, on lui donne accès à tous les projets
-        return queryset.filter(contributors__user=user) # filtre les projets dont l'utilisateur est contributeur
+            return queryset
+        # filtre les projets dont l'utilisateur est contributeur
+        return queryset.filter(contributors__user=user)
 
     def perform_create(self, serializer):
-        project = serializer.save(author=self.request.user) # crée un projet et l'associe à l'utilisateur en tant que créateur
-        Contributor.objects.get_or_create(user=self.request.user, project=project) # crée un contributeur pour le projet
+        # crée un projet et l'associe à l'utilisateur en tant que créateur
+        project = serializer.save(author=self.request.user)
+        # crée un contributeur pour le projet
+        Contributor.objects.get_or_create(user=self.request.user, project=project)
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object() # récupère le projet à supprimer
-        project_id = instance.id # récupère l'id du projet
-        title = instance.title # récupère le titre du projet
+        # récupère le projet à supprimer
+        instance = self.get_object()
+        # récupère l'id du projet
+        project_id = instance.id
+        # récupère le titre du projet
+        title = instance.title
 
-        self.perform_destroy(instance) # supprime le projet
+        # supprime le projet
+        self.perform_destroy(instance)
 
-        return Response({"detail": f"Project '{title}' (id={project_id}) deleted."}, status=status.HTTP_200_OK) # renvoie une réponse de succès
+        # renvoie une réponse de succès
+        return Response(
+            {"detail": f"Project '{title}' (id={project_id}) deleted."},
+            status=status.HTTP_200_OK
+        )
 
 
 class ContributorViewSet(MultipleSerializerMixin, ModelViewSet):
@@ -91,7 +103,12 @@ class ContributorViewSet(MultipleSerializerMixin, ModelViewSet):
         self.perform_destroy(instance)
 
         return Response(
-            {"detail": f"Contributor '{username}'(id={contributor_id}) removed from project '{project_title}' (id={project_id})."},
+            {
+                "detail": (
+                    f"Contributor '{username}'(id={contributor_id}) "
+                    f"removed from project '{project_title}' (id={project_id})."
+                )
+            },
             status=status.HTTP_200_OK
         )
 
@@ -124,7 +141,7 @@ class IssueViewSet(MultipleSerializerMixin, ModelViewSet):
         title = instance.title
         project_id = instance.project_id
         project_title = instance.project.title
-        
+
         self.perform_destroy(instance)
 
         return Response(
@@ -168,8 +185,13 @@ class CommentViewSet(MultipleSerializerMixin, ModelViewSet):
         issue_title = instance.issue.title
 
         self.perform_destroy(instance)
-        
+
         return Response(
-            {"detail": f"Comment '{description}' (id={comment_id}) deleted from issue '{issue_title}' (id={issue_id})."},
+            {
+                "detail": (
+                    f"Comment '{description}' (id={comment_id}) "
+                    f"deleted from issue '{issue_title}' (id={issue_id})."
+                )
+            },
             status=status.HTTP_200_OK
         )

@@ -1,5 +1,6 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
+
 class IsSelfOrSuperuserOrReadOnly(BasePermission):
     """
     Lecture: autorisée aux utilisateurs authentifiés (gérée par IsAuthenticated).
