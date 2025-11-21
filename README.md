@@ -96,3 +96,27 @@ poetry run python manage.py showmigrations
 ## Documentation de l'API
 
 La documentation complète de l'API est disponible à l'adresse suivante : `https://documenter.getpostman.com/view/36688365/2sB3WvNJjN`
+
+---
+
+### Contrôle de qualité du code avec flake8
+
+Le projet utilise flake8 pour vérifier la qualité et la conformité du code Python. La configuration se trouve dans le fichier `.flake8`.
+
+**Lancer une vérification flake8 :**
+
+```bash
+# Vérification simple dans le terminal
+poetry run flake8 .
+```
+
+**Générer un rapport HTML :**
+
+Pour obtenir un rapport détaillé au format HTML :
+
+```bash
+# Générer le rapport HTML
+poetry run flake8 . --format=html --htmldir=flake8_report
+```
+
+Le rapport HTML sera généré dans le dossier `flake8_report/`. Ouvrez le fichier `flake8_report/index.html` dans votre navigateur pour consulter les résultats détaillés.
